@@ -1,0 +1,99 @@
+name: scantailor-advanced
+base: core18 
+version: '1.0.16'
+summary: ScanTailor Advanced is a post-processing tool for scanned pages
+description: |
+  ScanTailor is an interactive post-processing tool for scanned pages. It performs operations such as:
+  - page splitting
+  - deskewing
+  - adding/removing borders
+  - selecting content
+  ... and others.
+  ScanTailor Advanced is the version that merges the features of the ScanTailor Featured and ScanTailor Enhanced versions, brings new ones and fixes. 
+
+grade: stable
+confinement: strict
+
+apps:
+  scantailor-advanced:
+      command: desktop-launch $SNAP/bin/scantailor
+      desktop: share/applications/scantailor.desktop
+      plugs: &plugs [opengl, x11, unity7, wayland, desktop, desktop-legacy, home, removable-media, gsettings, network, cups-control]
+      environment: &env
+          __EGL_VENDOR_LIBRARY_DIRS: $SNAP/usr/share/glvnd/egl_vendor.d
+          QT_QPA_PLATFORMTHEME: gtk3
+          QT_AUTO_SCREEN_SCALE_FACTOR: 1
+          DISABLE_WAYLAND: 1
+
+parts:
+  desktop-qt5:
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: qt
+    plugin: make
+    make-parameters: ["FLAVOR=qt5"]
+    build-packages:
+      - build-essential
+      - qtbase5-dev
+      - dpkg-dev
+    stage-packages:
+      - libxkbcommon0
+      - ttf-ubuntu-font-family
+      - dmz-cursor-theme
+      - light-themes
+      - adwaita-icon-theme
+      - gnome-themes-standard
+      - shared-mime-info
+      - libqt5gui5
+      - libgdk-pixbuf2.0-0
+      - libqt5svg5 # for loading icon themes which are svg
+      - try: [appmenu-qt5] # not available on core18
+      - locales-all 
+      - xdg-user-dirs
+      - fcitx-frontend-qt5
+
+  scantailor-advanced:
+    after: [desktop-qt5]
+    plugin: cmake
+    override-stage: |
+      snapcraftctl stage
+      # patch desktop file with correct icon path
+      SED_CMD="sed -i -E s|^Icon=(.*)|Icon=\${SNAP}/share/icons/hicolor/scalable/apps/\1.svg|g" 
+      $SED_CMD share/applications/scantailor.desktop
+    stage-packages:
+      - libdouble-conversion1
+      - libfreetype6
+      - libgl1
+      - libglvnd0
+      - libglx0
+      - libgraphite2-3
+      - libharfbuzz0b
+      - libicu60
+      - libjbig0
+      - libjpeg-turbo8
+      - libpng16-16
+      - libqt5core5a
+      - libqt5gui5
+      - libqt5opengl5
+      - libqt5widgets5
+      - libqt5xml5
+      - libtiff5
+      - libx11-6
+      - libxau6
+      - libxcb1
+      - libxdmcp6
+      - qtwayland5
+      - qt5-gtk-platformtheme
+      - libdrm2
+    build-packages: 
+      - g++
+      - libjpeg-dev
+      - libpng-dev
+      - libtiff5-dev
+      - libboost-test-dev
+      - qtbase5-dev
+      - qttools5-dev
+      - qttools5-dev-tools
+      - libqt5opengl5-dev
+      - libpthread-stubs0-dev
+    source: https://github.com/4lex4/scantailor-advanced.git
+    source-tag: "v1.0.16"
