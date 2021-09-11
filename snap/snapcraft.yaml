@@ -20,6 +20,8 @@ apps:
       desktop: usr/share/applications/scantailor.desktop
       extensions:
         - kde-neon
+      environment:
+        XDG_CURRENT_DESKTOP: KDE # force native file dialogs
       plugs: &plugs [home, removable-media, gsettings, network, cups-control]
 
 parts:
