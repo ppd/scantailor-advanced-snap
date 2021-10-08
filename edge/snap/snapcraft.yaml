@@ -1,0 +1,47 @@
+name: scantailor-advanced
+base: core20 
+version: "1.0.16~3d1e74e"
+summary: ScanTailor Advanced is a post-processing tool for scanned pages
+description: |
+  ScanTailor is an interactive post-processing tool for scanned pages. It performs operations such as:
+  - page splitting
+  - deskewing
+  - adding/removing borders
+  - selecting content
+  ... and others.
+  ScanTailor Advanced is the version that merges the features of the ScanTailor Featured and ScanTailor Enhanced versions, brings new ones and fixes. 
+
+grade: stable
+confinement: strict
+compression: lzo
+
+apps:
+  scantailor-advanced:
+      command: usr/bin/scantailor
+      desktop: usr/share/applications/scantailor.desktop
+      extensions:
+        - kde-neon
+      plugs: &plugs [home, removable-media, gsettings, network, cups-control]
+
+parts:
+  scantailor-advanced:
+    plugin: cmake
+    override-build: |
+      snapcraftctl build
+      # patch desktop file with correct icon path
+      sed -i -E \
+        "s|^Icon=(.*)|Icon=\${SNAP}/usr/share/icons/hicolor/scalable/apps/\1.svg|g" \
+        "${SNAPCRAFT_PART_INSTALL}/usr/share/applications/scantailor.desktop"
+    build-packages: 
+      - g++
+      - libjpeg-dev
+      - libpng-dev
+      - libtiff5-dev
+      - libboost-test-dev
+      - libglvnd-dev
+    source: https://github.com/4lex4/scantailor-advanced.git
+    source-commit: 3d1e74e6ace413733511086934a66f4e3f7a6027
+    cmake-parameters:
+      - "-DKDE_INSTALL_USE_QT_SYS_PATHS=ON"
+      - "-DCMAKE_INSTALL_PREFIX=/usr"
+      - "-DCMAKE_BUILD_TYPE=Release"
